@@ -10,8 +10,6 @@
 
 // narysowanie napisu txt na powierzchni screen, zaczynajac od punktu (x, y)
 // charset to bitmapa 128x128 zawierajaca znaki
-// draw a text txt on surface screen, starting from the point (x, y)
-// charset is a 128x128 bitmap containing character images
 void DrawString(SDL_Surface *screen, int x, int y, const char *text,
                 SDL_Surface *charset)
 {
@@ -76,7 +74,7 @@ void DrawLine(SDL_Surface *screen, int x, int y, int l, int dx, int dy, Uint32 c
 };
 
 
-// rysowanie prostok�ta o d�ugo�ci bok�w l i k
+// rysowanie prostokata o dlugosci bokow l i k
 // draw a rectangle of size l by k
 void DrawRectangle(SDL_Surface *screen, int x, int y, int l, int k,
                    Uint32 outlineColor, Uint32 fillColor)
@@ -91,13 +89,10 @@ void DrawRectangle(SDL_Surface *screen, int x, int y, int l, int k,
 };
 
 
-// main
-#ifdef __cplusplus
-extern "C"
-#endif
+
 int main(int argc, char **argv) 
 {
-	int t1, t2, quit, frames, rc;
+	int t1, t2, quit, frames, rc, newGame;
 	double delta, worldTime, fpsTimer, fps, distance, etiSpeed;
 	SDL_Event event;
 	SDL_Surface *screen, *charset;
@@ -115,7 +110,7 @@ int main(int argc, char **argv)
 	// project -> szablon2 properties -> Linker -> System -> Subsystem
 	// must be changed to "Console"
 	printf("wyjscie printfa trafia do tego okienka\n");
-	printf("printf output goes here\n");
+	//printf("printf output goes here\n");
 
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) 
 	{
@@ -123,9 +118,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	// tryb pe�noekranowy / fullscreen mode
-//	rc = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP,
-//	                                 &window, &renderer);
+	// tryb pelnoekranowy / fullscreen mode
+	//rc = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP,
+	//                                 &window, &renderer);
 	rc = SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0,
 	                                 &window, &renderer);
 	if(rc != 0) 
@@ -139,7 +134,7 @@ int main(int argc, char **argv)
 	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-	SDL_SetWindowTitle(window, "Szablon do zdania drugiego 2017");
+	SDL_SetWindowTitle(window, "UNICORN ROBOT ATTACK");
 
 
 	screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
@@ -150,11 +145,11 @@ int main(int argc, char **argv)
 	                           SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-	// wy��czenie widoczno�ci kursora myszy
+	// wylaczenie widocznosci kursora myszy
 	SDL_ShowCursor(SDL_DISABLE);
 
 	// wczytanie obrazka cs8x8.bmp
-	charset = SDL_LoadBMP("./cs8x8.bmp");
+	charset = SDL_LoadBMP("assets/cs8x8.bmp");
 	if(charset == NULL) 
 	{
 		printf("SDL_LoadBMP(cs8x8.bmp) error: %s\n", SDL_GetError());
@@ -167,7 +162,7 @@ int main(int argc, char **argv)
 	};
 	SDL_SetColorKey(charset, true, 0x000000);
 
-	eti = SDL_LoadBMP("./eti.bmp");
+	eti = SDL_LoadBMP("assets/eti.bmp");
 	if(eti == NULL) 
 	{
 		printf("SDL_LoadBMP(eti.bmp) error: %s\n", SDL_GetError());
@@ -195,71 +190,91 @@ int main(int argc, char **argv)
 	worldTime = 0;
 	distance = 0;
 	etiSpeed = 1;
+	
 
 	while(!quit) 
 	{
-		t2 = SDL_GetTicks();
-
-		// w tym momencie t2-t1 to czas w milisekundach,
-		// jaki uplyna� od ostatniego narysowania ekranu
-		// delta to ten sam czas w sekundach
-		// here t2-t1 is the time in milliseconds since
-		// the last screen was drawn
-		// delta is the same time in seconds
-		delta = (t2 - t1) * 0.001;
-		t1 = t2;
-
-		worldTime += delta;
-
-		distance += etiSpeed * delta;
-
-		SDL_FillRect(screen, NULL, czarny);
-
-		DrawSurface(screen, eti,
-		            SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
-			    SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
-
-		fpsTimer += delta;
-		if(fpsTimer > 0.5)
+		newGame = 0;
+		while(!newGame)
 		{
-			fps = frames * 2;
-			frames = 0;
-			fpsTimer -= 0.5;
-		};
+			t2 = SDL_GetTicks();
 
-		// tekst informacyjny / info text
-		DrawRectangle(screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
-		//            "template for the second project, elapsed time = %.1lf s  %.0lf frames / s"
-		sprintf(text, "Szablon drugiego zadania, czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
-		DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 10, text, charset);
-		//	      "Esc - exit, \030 - faster, \031 - slower"
-		sprintf(text, "Esc - wyjscie, \030 - przyspieszenie, \031 - zwolnienie");
-		DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 26, text, charset);
+			// w tym momencie t2-t1 to czas w milisekundach,
+			// jaki uplynal od ostatniego narysowania ekranu
+			// delta to ten sam czas w sekundach
+			// here t2-t1 is the time in milliseconds since
+			// the last screen was drawn
+			// delta is the same time in seconds
+			delta = (t2 - t1) * 0.001;
+			t1 = t2;
 
-		SDL_UpdateTexture(scrtex, NULL, screen->pixels, screen->pitch);
-//		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, scrtex, NULL, NULL);
-		SDL_RenderPresent(renderer);
+			worldTime += delta;
 
-		// obs�uga zdarze� (o ile jakie� zasz�y) / handling of events (if there were any)
-		while(SDL_PollEvent(&event)) 
-		{
-			switch(event.type) 
+			distance += etiSpeed * delta;
+
+			SDL_FillRect(screen, NULL, czarny);
+
+			DrawSurface(screen, eti,
+						SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
+					SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
+
+			fpsTimer += delta;
+			if(fpsTimer > 0.5)
 			{
-				case SDL_KEYDOWN:
-					if(event.key.keysym.sym == SDLK_ESCAPE) quit = 1;
-					else if(event.key.keysym.sym == SDLK_UP) etiSpeed = 2.0;
-					else if(event.key.keysym.sym == SDLK_DOWN) etiSpeed = 0.3;
-					break;
-				case SDL_KEYUP:
-					etiSpeed = 1.0;
-					break;
-				case SDL_QUIT:
-					quit = 1;
-					break;
+				fps = frames * 2;
+				frames = 0;
+				fpsTimer -= 0.5;
 			};
-		};
-		frames++;
+
+			// tekst informacyjny / info text
+			DrawRectangle(screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
+			//            "template for the second project, elapsed time = %.1lf s  %.0lf frames / s"
+			sprintf(text, "Szablon drugiego zadania, czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
+			DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 10, text, charset);
+			//	      "Esc - exit, \030 - faster, \031 - slower"
+			sprintf(text, "Esc - wyjscie, N-nowa gra \030 - przyspieszenie, \031 - zwolnienie");
+			DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 26, text, charset);
+
+			SDL_UpdateTexture(scrtex, NULL, screen->pixels, screen->pitch);
+	//		SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, scrtex, NULL, NULL);
+			SDL_RenderPresent(renderer);
+
+			// obsluga zdarzen (o ile jakies zaszly) / handling of events (if there were any)
+			while(SDL_PollEvent(&event)) 
+			{
+				switch(event.type) 
+				{
+					case SDL_KEYDOWN:
+						if(event.key.keysym.sym == SDLK_ESCAPE) 
+						{
+							quit = 1;
+							newGame = 1;
+						}
+						else if(event.key.keysym.sym == SDLK_UP) etiSpeed = 2.0;
+						else if(event.key.keysym.sym == SDLK_DOWN) etiSpeed = 0.3;
+						else if(event.key.keysym.sym == SDLK_n) 
+						{
+							newGame = 1;
+							frames = 0;
+							fpsTimer = 0;
+							fps = 0;
+							worldTime = 0;
+							distance = 0;
+						}
+						break;
+					case SDL_KEYUP:
+						etiSpeed = 1.0;
+						break;
+					case SDL_QUIT:
+						quit = 1;
+						newGame = 1;
+						break;
+				};
+			};
+			frames++;
+		}
+		
 	};
 
 	// zwolnienie powierzchni / freeing all surfaces
