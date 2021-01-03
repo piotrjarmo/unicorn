@@ -93,7 +93,8 @@ void DrawRectangle(SDL_Surface *screen, int x, int y, int l, int k,
 int main(int argc, char **argv) 
 {
 	int t1, t2, quit, frames, rc, newGame;
-	double delta, worldTime, fpsTimer, fps, distance, etiSpeed;
+	double delta, worldTime, fpsTimer, fps, distance, etiSpeed, jump;
+	
 	SDL_Event event;
 	SDL_Surface *screen, *charset;
 	SDL_Surface *eti;
@@ -101,14 +102,6 @@ int main(int argc, char **argv)
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	// okno konsoli nie jest widoczne, jezeli chcemy zobaczyc
-	// komunikaty wypisywane printf-em trzeba w opcjach:
-	// project -> szablon2 properties -> Linker -> System -> Subsystem
-	// zmienic na "Console"
-	// console window is not visible, to see the printf output
-	// the option:
-	// project -> szablon2 properties -> Linker -> System -> Subsystem
-	// must be changed to "Console"
 	printf("wyjscie printfa trafia do tego okienka\n");
 	//printf("printf output goes here\n");
 
@@ -134,7 +127,7 @@ int main(int argc, char **argv)
 	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-	SDL_SetWindowTitle(window, "UNICORN ROBOT ATTACK");
+	SDL_SetWindowTitle(window, "ROBOT UNICORN ATTACK");
 
 
 	screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
@@ -162,7 +155,7 @@ int main(int argc, char **argv)
 	};
 	SDL_SetColorKey(charset, true, 0x000000);
 
-	eti = SDL_LoadBMP("assets/eti.bmp");
+	eti = SDL_LoadBMP("assets/player.bmp");
 	if(eti == NULL) 
 	{
 		printf("SDL_LoadBMP(eti.bmp) error: %s\n", SDL_GetError());
@@ -190,6 +183,7 @@ int main(int argc, char **argv)
 	worldTime = 0;
 	distance = 0;
 	etiSpeed = 1;
+	jump = 0;
 	
 
 	while(!quit) 
@@ -215,8 +209,8 @@ int main(int argc, char **argv)
 			SDL_FillRect(screen, NULL, czarny);
 
 			DrawSurface(screen, eti,
-						SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
-					SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
+						(SCREEN_WIDTH / 5),
+						3* (SCREEN_HEIGHT / 4) - jump);
 
 			fpsTimer += delta;
 			if(fpsTimer > 0.5)
@@ -229,7 +223,7 @@ int main(int argc, char **argv)
 			// tekst informacyjny / info text
 			DrawRectangle(screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
 			//            "template for the second project, elapsed time = %.1lf s  %.0lf frames / s"
-			sprintf(text, "Szablon drugiego zadania, czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
+			sprintf(text, "czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
 			DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 10, text, charset);
 			//	      "Esc - exit, \030 - faster, \031 - slower"
 			sprintf(text, "Esc - wyjscie, N-nowa gra \030 - przyspieszenie, \031 - zwolnienie");
@@ -251,7 +245,7 @@ int main(int argc, char **argv)
 							quit = 1;
 							newGame = 1;
 						}
-						else if(event.key.keysym.sym == SDLK_UP) etiSpeed = 2.0;
+						else if(event.key.keysym.sym == SDLK_UP) jump = 100;
 						else if(event.key.keysym.sym == SDLK_DOWN) etiSpeed = 0.3;
 						else if(event.key.keysym.sym == SDLK_n) 
 						{
@@ -264,7 +258,7 @@ int main(int argc, char **argv)
 						}
 						break;
 					case SDL_KEYUP:
-						etiSpeed = 1.0;
+						jump = 0.0;
 						break;
 					case SDL_QUIT:
 						quit = 1;
