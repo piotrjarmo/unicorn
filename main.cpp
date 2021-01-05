@@ -3,8 +3,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <vector>
-#include <iostream>
 using namespace std;
 
 void DrawString(SDL_Surface* screen, int x, int y, const char* text, SDL_Surface* charset)
@@ -101,7 +99,8 @@ class Platform
 {
 public:
     double x, y, w, h;
-    Platform(double xx, double yy, double ww, double hh)
+    Platform() {}
+    void init(double xx, double yy, double ww, double hh) 
 	{
 		x = xx;
 		y = yy;
@@ -113,10 +112,10 @@ public:
 class Level 
 {
 public:
-    int       		 platform_count;
-    vector<Platform> platforms;
+    int       platform_count;
+    Platform* platforms;
 
-    Level(unsigned platform_count_, vector<Platform> platforms_) 
+    Level(unsigned platform_count_, Platform platforms_[]) 
 	{
 		platform_count = platform_count_;
 		platforms 	   = platforms_;
@@ -193,7 +192,7 @@ public:
 			{
                 // otherwise: unicorn is dead
                 endGame = true;
-                SDL_Delay(1000);
+                SDL_Delay(2000);
             }
         }
     }
@@ -225,8 +224,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    rc = SDL_CreateWindowAndRenderer(
-        SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
+    rc = SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     if (rc != 0) 
 	{
         SDL_Quit();
@@ -253,24 +251,24 @@ int main(int argc, char** argv)
     fps      = 0;
     exit     = 0;
 
-	int RED   = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
+    int RED   = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
     int PINK  = SDL_MapRGB(screen->format, 253,185,200);
     int BLACK = SDL_MapRGB(screen->format, 0,0,0);
-	int WHITE = SDL_MapRGB(screen->format, 255,255,255);
+    int WHITE = SDL_MapRGB(screen->format, 255,255,255);
 
     // Transfer data from file to standard stream
 	freopen("lvl1.txt", "r", stdin);
-	
+	scanf("%d",&n);
     // Read platform position and dimensions
-    vector<Platform> platforms;
-	while (cin >> px >> py >> pw >> ph)
-		platforms.push_back(Platform(px, py, pw, ph));
+    Platform platforms[100];
+    for (int i = 0; i < n; i++) {
+        scanf("%lf %lf %lf %lf",&px,&py,&pw,&ph);
+        platforms[i].init(px, py, pw, ph);
+    }
 
-    GameState gs(new Level(platforms.size(), platforms));
-
+    GameState gs(new Level(n, platforms));
     while (!exit && !gs.endGame) 
 	{
-
         // Update time and timestep
         t2    = SDL_GetTicks();
         delta = (t2 - t1) * 0.001;
@@ -322,7 +320,7 @@ int main(int argc, char** argv)
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     exit = 1;
-                else if (event.key.keysym.sym == SDLK_UP)
+                else if (event.key.keysym.sym == SDLK_z)
                     gs.unicorn->dy = 10;
                 else if (event.key.keysym.sym == SDLK_n)
                     gs.restart();
@@ -331,8 +329,7 @@ int main(int argc, char** argv)
 					if (gs.movement == AUTO) 
 					{
 						gs.movement = ARROWS;
-					}
-					else
+					} else
 						gs.movement = AUTO;
                     gs.unicorn->dx = 0;
 				}
