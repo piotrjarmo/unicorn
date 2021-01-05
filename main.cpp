@@ -169,8 +169,6 @@ public:
 		{
             unicorn->dx *= DASH_SPEED_MULT;
 			unicorn->dash_time -= 0.02;
-			dash_count++;
-			if(jump_count > 0) jump_count--;
         }
         if (unicorn->dash_time < 0)
 		{
@@ -350,9 +348,11 @@ int main(int argc, char** argv)
                     gs.unicorn->dx += 2;
 				else if (event.key.keysym.sym == SDLK_LEFT && gs.movement == ARROWS)
                     gs.unicorn->dx -= 2;
-				else if (event.key.keysym.sym == SDLK_x)
+				else if (event.key.keysym.sym == SDLK_x && gs.dash_count < 1)
 				{
 					gs.unicorn->dash_time = 1;
+					gs.dash_count++;
+					if(gs.jump_count > 0) gs.jump_count--;
 				}
                     
 
