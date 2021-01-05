@@ -135,7 +135,9 @@ public:
 	Level*   level;
     double   time;
     bool     endGame;
-	Movement movement;	 
+	Movement movement;
+	int jump_count;
+	int dash_count;	 
 
     GameState(Level* lvl) 
 	{
@@ -144,6 +146,8 @@ public:
 		endGame = false;
 		level = lvl;
 		movement = AUTO;
+		jump_count = 0;
+		dash_count = 0;
 	}
 
     void update(double timestep) 
@@ -165,10 +169,14 @@ public:
 		{
             unicorn->dx *= DASH_SPEED_MULT;
 			unicorn->dash_time -= 0.02;
+			dash_count++;
+			if(jump_count > 0) jump_count--;
         }
         if (unicorn->dash_time < 0)
+		{
 			unicorn->dash_time = 0;
-		
+			dash_count = 0;
+		}
         // Collisions with platforms
         for (int i = 0; i < level->platform_count; i++) 
 		{
@@ -186,7 +194,9 @@ public:
 			{
                 // Unicorn landed on platform from above
                 unicorn->y = p.y + UNICORN_HEIGHT_STANDARDIZED;
-                unicorn->dy = 0;	
+                unicorn->dy = 0;
+				jump_count = 0;
+				dash_count = 0;	
             } 
             else 
 			{
@@ -320,8 +330,11 @@ int main(int argc, char** argv)
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     exit = 1;
-                else if (event.key.keysym.sym == SDLK_z)
-                    gs.unicorn->dy = 10;
+                else if (event.key.keysym.sym == SDLK_z && gs.jump_count < 2 )
+                {
+					gs.unicorn->dy = 10;
+					gs.jump_count++;
+				}   
                 else if (event.key.keysym.sym == SDLK_n)
                     gs.restart();
 				else if (event.key.keysym.sym == SDLK_d) 
@@ -338,7 +351,10 @@ int main(int argc, char** argv)
 				else if (event.key.keysym.sym == SDLK_LEFT && gs.movement == ARROWS)
                     gs.unicorn->dx -= 2;
 				else if (event.key.keysym.sym == SDLK_x)
-                    gs.unicorn->dash_time = 1;
+				{
+					gs.unicorn->dash_time = 1;
+				}
+                    
 
                 break;
             case SDL_QUIT:
