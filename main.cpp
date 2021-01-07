@@ -173,7 +173,6 @@ public:
         if (unicorn->dash_time < 0)
 		{
 			unicorn->dash_time = 0;
-			dash_count = 0;
 		}
         // Collisions with platforms
         for (int i = 0; i < level->platform_count; i++) 
@@ -199,8 +198,9 @@ public:
             else 
 			{
                 // otherwise: unicorn is dead
-                endGame = true;
-                SDL_Delay(2000);
+                //endGame = true;
+                restart();
+                SDL_Delay(500);
             }
         }
     }
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
 	freopen("lvl1.txt", "r", stdin);
 	scanf("%d",&n);
     // Read platform position and dimensions
-    Platform platforms[100];
+    Platform* platforms = new Platform[n];
     for (int i = 0; i < n; i++) {
         scanf("%lf %lf %lf %lf",&px,&py,&pw,&ph);
         platforms[i].init(px, py, pw, ph);
@@ -348,12 +348,13 @@ int main(int argc, char** argv)
                     gs.unicorn->dx += 2;
 				else if (event.key.keysym.sym == SDLK_LEFT && gs.movement == ARROWS)
                     gs.unicorn->dx -= 2;
-				else if (event.key.keysym.sym == SDLK_x && gs.dash_count < 1)
+				else if (event.key.keysym.sym == SDLK_x && gs.dash_count < 1 && event.key.repeat == 0)
 				{
 					gs.unicorn->dash_time = 1;
 					gs.dash_count++;
-					if(gs.jump_count > 0) gs.jump_count--;
+					gs.jump_count = 1;
 				}
+
                     
 
                 break;
@@ -364,7 +365,7 @@ int main(int argc, char** argv)
         };
         frames++;
     };
-
+    
     SDL_FreeSurface(screen);
 	SDL_FreeSurface(charset);
     SDL_DestroyTexture(scrtex);
