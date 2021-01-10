@@ -4,7 +4,21 @@
 #include <cstdio>
 #include <cstring>
 #include <SDL2/SDL_image.h>
-using namespace std;
+
+#define SCREEN_WIDTH 				 640  // screen x size
+#define SCREEN_HEIGHT 				 480  // screen y size
+#define SCALE 						 32   // square unit size in pixels
+#define UNICORN_WIDTH_STANDARDIZED 	 2    // unicorn x size in units
+#define UNICORN_HEIGHT_STANDARDIZED  1    // unicorn y size in units
+#define PLATFORM_HEIGHT_STANDARDIZED 1    // platform y size in units
+#define UNICORN_WIDTH_PX 			 64   // unicorn x size in pixels
+#define UNICORN_HEIGHT_PX            32   // unicorn y size in pixels
+#define UNICORN_JUMP_TIME_MAX        100  // 
+#define JUMP_DY_STEP                 5    //
+#define JUMP_TIME_STEP               10   //
+#define GRAVITY                      15   // gravitational constant
+#define DASH_SPEED_MULT 			 2    // dash velocity constant
+
 
 void DrawString(SDL_Surface* screen, int x, int y, const char* text, SDL_Surface* charset)
 {
@@ -69,17 +83,6 @@ void DrawRectangle(SDL_Surface* screen, int x, int y, int l, int k, Uint32 outli
     for (i = y + 1; i < y + k - 1; i++)
         DrawLine(screen, x + 1, i, l - 2, 1, 0, fillColor);
 };
-
-#define SCREEN_WIDTH 				 640  // screen x size
-#define SCREEN_HEIGHT 				 480  // screen y size
-#define SCALE 						 32   // square unit size in pixels
-#define UNICORN_WIDTH_STANDARDIZED 	 2    // unicorn x size in units
-#define UNICORN_HEIGHT_STANDARDIZED  1    // unicorn y size in units
-#define PLATFORM_HEIGHT_STANDARDIZED 1    // platform y size in units
-#define UNICORN_WIDTH_PX 			 64   // unicorn x size in pixels
-#define UNICORN_HEIGHT_PX            32   // unicorn y size in pixels
-#define GRAVITY                      15   // gravitational constant
-#define DASH_SPEED_MULT 			 2    // dash velocity constant
 
 class Unicorn 
 {
@@ -223,6 +226,7 @@ int main(int argc, char** argv)
 	double 		  px, py, pw, ph;
     SDL_Event     event;
     SDL_Surface*  screen;
+    SDL_Surface* background;
 	SDL_Surface*  charset;
     SDL_Texture*  scrtex;
     SDL_Window*   window;
@@ -245,10 +249,12 @@ int main(int argc, char** argv)
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_SetWindowTitle(window, "Unicorn Attack");
-
+    SDL_SetWindowTitle(window, "ROBOT UNICORN ATTACK");
+    
+    background = SDL_LoadBMP("assets/background.bmp");
+    if(background == NULL) printf("LoadBMP error\n");
     screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    scrtex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    scrtex = SDL_CreateTextureFromSurface(renderer, background);
 
 	char text[128];
     charset = SDL_LoadBMP("./assets/cs8x8.bmp");
@@ -301,6 +307,7 @@ int main(int argc, char** argv)
 
         // Clear display
         SDL_FillRect(screen, NULL, WHITE);
+        SDL_BlitSurface(background, NULL, screen, NULL);
 
         // Draw Unicorn
         DrawRectangle(screen, SCALE, (SCREEN_HEIGHT-UNICORN_HEIGHT_PX)/2, UNICORN_WIDTH_PX, UNICORN_HEIGHT_PX, RED, RED);
@@ -333,7 +340,7 @@ int main(int argc, char** argv)
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     exit = 1;
-                else if (event.key.keysym.sym == SDLK_z && gs.jump_count < 2 )
+                else if (event.key.keysym.sym == SDLK_z && gs.jump_count < 2 && event.key.repeat == 0)
                 {
 					gs.unicorn->dy = 10;
 					gs.jump_count++;
@@ -369,6 +376,7 @@ int main(int argc, char** argv)
     };
     delete [] platforms;
     SDL_FreeSurface(screen);
+    SDL_FreeSurface(background);
 	SDL_FreeSurface(charset);
     SDL_DestroyTexture(scrtex);
     SDL_DestroyRenderer(renderer);
