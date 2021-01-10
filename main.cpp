@@ -173,6 +173,7 @@ public:
         if (unicorn->dash_time > 0) 
 		{
             unicorn->dx *= DASH_SPEED_MULT;
+            unicorn->dy = 0;
 			unicorn->dash_time -= 0.02;
         }
         if (unicorn->dash_time < 0)
