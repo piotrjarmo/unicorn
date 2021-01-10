@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <SDL2/SDL_image.h>
 using namespace std;
 
 void DrawString(SDL_Surface* screen, int x, int y, const char* text, SDL_Surface* charset)
@@ -69,21 +70,22 @@ void DrawRectangle(SDL_Surface* screen, int x, int y, int l, int k, Uint32 outli
         DrawLine(screen, x + 1, i, l - 2, 1, 0, fillColor);
 };
 
-#define SCREEN_WIDTH 				 640
-#define SCREEN_HEIGHT 				 480
-#define SCALE 						 32
-#define UNICORN_WIDTH_STANDARDIZED 	 2
-#define UNICORN_HEIGHT_STANDARDIZED  1
-#define PLATFORM_HEIGHT_STANDARDIZED 1
-#define UNICORN_WIDTH_PX 			 64
-#define UNICORN_HEIGHT_PX            32
-#define GRAVITY                      15
-#define DASH_SPEED_MULT 			 2
+#define SCREEN_WIDTH 				 640  // screen x size
+#define SCREEN_HEIGHT 				 480  // screen y size
+#define SCALE 						 32   // square unit size in pixels
+#define UNICORN_WIDTH_STANDARDIZED 	 2    // unicorn x size in units
+#define UNICORN_HEIGHT_STANDARDIZED  1    // unicorn y size in units
+#define PLATFORM_HEIGHT_STANDARDIZED 1    // platform y size in units
+#define UNICORN_WIDTH_PX 			 64   // unicorn x size in pixels
+#define UNICORN_HEIGHT_PX            32   // unicorn y size in pixels
+#define GRAVITY                      15   // gravitational constant
+#define DASH_SPEED_MULT 			 2    // dash velocity constant
 
 class Unicorn 
 {
 public:
-    double x, y, dx, dy;
+    // width, height, position
+    double x, y, dx, dy; 
 	double dash_time;
     Unicorn(double xx, double yy) 
 	{
@@ -98,7 +100,8 @@ public:
 class Platform 
 {
 public:
-    double x, y, w, h;
+    // position, width, height
+    double x, y, w, h; 
     Platform() {}
     void init(double xx, double yy, double ww, double hh) 
 	{
@@ -149,7 +152,6 @@ public:
 		jump_count = 0;
 		dash_count = 0;
 	}
-
     void update(double timestep) 
 	{
 
@@ -217,7 +219,7 @@ public:
 int main(int argc, char** argv) 
 {
     int           t1, t2, exit, frames, rc, n;
-    double        delta, fpsTimer, fps, distance, etiSpeed;
+    double        delta, fpsTimer, fps, distance;
 	double 		  px, py, pw, ph;
     SDL_Event     event;
     SDL_Surface*  screen;
@@ -266,14 +268,16 @@ int main(int argc, char** argv)
 
     // Transfer data from file to standard stream
 	freopen("lvl1.txt", "r", stdin);
-	scanf("%d",&n);
+	scanf("%d", &n);
+
     // Read platform position and dimensions
     Platform* platforms = new Platform[n];
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) 
+    {
         scanf("%lf %lf %lf %lf",&px,&py,&pw,&ph);
         platforms[i].init(px, py, pw, ph);
     }
-
+    
     GameState gs(new Level(n, platforms));
     while (!exit && !gs.endGame) 
 	{
@@ -314,7 +318,8 @@ int main(int argc, char** argv)
 		}
 
 		// Draw information in top box
-		sprintf(text, "position(%.2f, %.2f) speed(%.2f, %.2f) dash: %.2f fps: %f", gs.unicorn->x, gs.unicorn->y, gs.unicorn->dx, gs.unicorn->dy, gs.unicorn->dash_time, fps);
+		sprintf(text, "position(%.2f, %.2f) speed(%.2f, %.2f) dash: %.2f fps: %f", 
+                gs.unicorn->x, gs.unicorn->y, gs.unicorn->dx, gs.unicorn->dy, gs.unicorn->dash_time, fps);
         DrawString(screen, 4, 4, text, charset);
 
         SDL_UpdateTexture(scrtex, NULL, screen->pixels, screen->pitch);
@@ -354,9 +359,6 @@ int main(int argc, char** argv)
 					gs.dash_count++;
 					gs.jump_count = 1;
 				}
-
-                    
-
                 break;
             case SDL_QUIT:
                 exit = 1;
@@ -365,7 +367,7 @@ int main(int argc, char** argv)
         };
         frames++;
     };
-    
+    delete [] platforms;
     SDL_FreeSurface(screen);
 	SDL_FreeSurface(charset);
     SDL_DestroyTexture(scrtex);
