@@ -12,9 +12,9 @@
 #define PLATFORM_HEIGHT_STANDARDIZED 1    // platform y size in units
 #define UNICORN_WIDTH_PX 			 64   // unicorn x size in pixels
 #define UNICORN_HEIGHT_PX            32   // unicorn y size in pixels
-#define UNICORN_JUMP_TIME_MAX        100  // 
-#define JUMP_DY_STEP                 5    //
-#define JUMP_TIME_STEP               10   //
+#define UNICORN_JUMP_TIME_MAX        100  // maximum jump acceleration time
+#define JUMP_DY_STEP                 5    // velocity change per frame
+#define JUMP_TIME_STEP               10   // acceleration time change per frame
 #define GRAVITY                      15   // gravitational constant
 #define DASH_SPEED_MULT 			 2    // dash velocity constant
 
