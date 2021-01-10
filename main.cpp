@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <SDL2/SDL_image.h>
 
 #define SCREEN_WIDTH 				 640  // screen x size
 #define SCREEN_HEIGHT 				 480  // screen y size
